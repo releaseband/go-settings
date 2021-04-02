@@ -1,4 +1,4 @@
-module github.com/releaseband/settings
+module github.com/releaseband/go-settings
 
 go 1.16
 
