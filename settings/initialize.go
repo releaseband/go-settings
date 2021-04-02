@@ -1,6 +1,7 @@
 package settings
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/spf13/viper"
@@ -9,7 +10,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func SetInitialData(cfg interface{}) error {
+var ErrNotImplementedForThisType = errors.New("not implemented for type")
+
+func setYamlSettings(cfg interface{}) error {
 	data, err := yaml.Marshal(cfg)
 	if err != nil {
 		return fmt.Errorf("yaml.Marshal: %w", err)
@@ -22,14 +25,34 @@ func SetInitialData(cfg interface{}) error {
 	return nil
 }
 
-func SetSettingsFromFile(fileName, path string, cfg interface{}) error {
-	if err := reader.ReadSettingFromFile(fileName, path); err != nil {
-		return err
+func SetInitialData(cfg interface{}, configType string) error {
+	if configType != "yaml" {
+		return ErrNotImplementedForThisType
 	}
 
+	return setYamlSettings(cfg)
+}
+
+func unmarshal(cfg interface{}) error {
 	if err := viper.Unmarshal(cfg); err != nil {
 		return fmt.Errorf("viper.Unmarshal: %w", err)
 	}
 
 	return nil
+}
+
+func SetSettingsFromFile(fileName, path string, cfg interface{}) error {
+	if err := reader.ReadSettingFromFile(fileName, path); err != nil {
+		return err
+	}
+
+	return unmarshal(cfg)
+}
+
+func SetSettings(data []byte, cfg interface{}, configType string) error {
+	if err := reader.ReadSettingFromByte(data, configType); err != nil {
+		return err
+	}
+
+	return unmarshal(cfg)
 }
