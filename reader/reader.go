@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -24,16 +23,6 @@ func ReadSettingFromByte(data []byte, configType string) error {
 	return nil
 }
 
-func ReadSettingFromReader(reader io.Reader, configType string) error {
-	viper.SetConfigType(configType)
-
-	if err := viper.ReadConfig(reader); err != nil {
-		return fmt.Errorf("ReadConfig failed: %w", err)
-	}
-
-	return nil
-}
-
 func ReadSettingFromFile(fileName, path string) error {
 	if len(strings.TrimSpace(fileName)) != 0 {
 		viper.SetConfigFile(fileName)
@@ -43,6 +32,12 @@ func ReadSettingFromFile(fileName, path string) error {
 	viper.AddConfigPath(path)
 
 	if err := viper.ReadInConfig(); err != nil {
+		var errFileNotFound viper.ConfigFileNotFoundError
+
+		if errors.As(err, &errFileNotFound) {
+			return ErrFileNotFound
+		}
+
 		return fmt.Errorf("viper.ReadConfig(`%s`): %w", fileName, err)
 	}
 
