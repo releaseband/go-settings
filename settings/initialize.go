@@ -12,7 +12,7 @@ import (
 
 var ErrNotImplementedForThisType = errors.New("not implemented for type")
 
-func setYamlSettings(cfg interface{}) error {
+func SetYamlSettings(cfg interface{}) error {
 	data, err := yaml.Marshal(cfg)
 	if err != nil {
 		return fmt.Errorf("yaml.Marshal: %w", err)
@@ -30,12 +30,12 @@ func SetInitialData(cfg interface{}, configType string) error {
 		return ErrNotImplementedForThisType
 	}
 
-	return setYamlSettings(cfg)
+	return SetYamlSettings(cfg)
 }
 
-func unmarshal(cfg interface{}) error {
+func UnmarshalSettings(cfg interface{}) error {
 	if err := viper.Unmarshal(cfg); err != nil {
-		return fmt.Errorf("viper.Unmarshal: %w", err)
+		return fmt.Errorf("viper.UnmarshalSettings: %w", err)
 	}
 
 	return nil
@@ -46,7 +46,7 @@ func SetSettingsFromFile(fileName, path string, cfg interface{}) error {
 		return err
 	}
 
-	return unmarshal(cfg)
+	return UnmarshalSettings(cfg)
 }
 
 func SetSettings(data []byte, cfg interface{}, configType string) error {
@@ -54,5 +54,5 @@ func SetSettings(data []byte, cfg interface{}, configType string) error {
 		return err
 	}
 
-	return unmarshal(cfg)
+	return UnmarshalSettings(cfg)
 }
