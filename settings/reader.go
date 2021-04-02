@@ -1,4 +1,4 @@
-package reader
+package settings
 
 import (
 	"bytes"
@@ -13,7 +13,7 @@ import (
 
 var ErrFileNotFound = errors.New("file not found")
 
-func ReadSettingFromByte(data []byte, configType string) error {
+func ReadSettings(data []byte, configType string) error {
 	viper.SetConfigType(configType)
 
 	if err := viper.ReadConfig(bytes.NewBuffer(data)); err != nil {
@@ -23,7 +23,7 @@ func ReadSettingFromByte(data []byte, configType string) error {
 	return nil
 }
 
-func ReadSettingFromFile(fileName, path string) error {
+func ReadSettingsFromFile(fileName, path string) error {
 	if len(strings.TrimSpace(fileName)) != 0 {
 		viper.SetConfigFile(fileName)
 	}
