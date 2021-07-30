@@ -65,15 +65,10 @@ func UnmarshalEnv(envPrefix string, cfg interface{}) error {
 	return envconfig.Process(envPrefix, cfg)
 }
 
-func UnmarshalEmbed(fs embed.FS, embedDirName string, prefix string, cfg interface{}) error {
-	secrets, err := GetEmbedConfigs(fs, embedDirName)
-	if err != nil {
-		return err
-	}
-
+func SetEnvs(prefix string, configs map[string][]byte) error {
 	viper.SetEnvPrefix(prefix)
 
-	for k, v := range secrets {
+	for k, v := range configs {
 		if err := viper.BindEnv(k); err != nil {
 			return fmt.Errorf("bind env %s failed: %w", k, err)
 		}
@@ -81,6 +76,33 @@ func UnmarshalEmbed(fs embed.FS, embedDirName string, prefix string, cfg interfa
 		if err := os.Setenv(strings.ToUpper(prefix+"_"+k), string(v)); err != nil {
 			return fmt.Errorf("os.Setenv %s failed: %w", k, err)
 		}
+	}
+
+	return nil
+}
+
+func UnmarshalEmbed(fs embed.FS, embedDirName string, prefix string, cfg interface{}) error {
+	secrets, err := GetEmbedConfigs(fs, embedDirName)
+	if err != nil {
+		return err
+	}
+
+	if err := SetEnvs(prefix, secrets); err != nil {
+		return err
+	}
+
+	return UnmarshalEnv(prefix, cfg)
+
+}
+
+func UnmarshalConfigsFromDir(dirName, prefix string, cfg interface{}) error {
+	configs, err := ReadDir(dirName)
+	if err != nil {
+		return err
+	}
+
+	if err := SetEnvs(prefix, configs); err != nil {
+		return err
 	}
 
 	return UnmarshalEnv(prefix, cfg)
