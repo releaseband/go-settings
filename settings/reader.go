@@ -38,7 +38,7 @@ func ReadSettingsFromFile(fileName, path string) error {
 			return ErrFileNotFound
 		}
 
-		return fmt.Errorf("viper.ReadConfig(`%s`): %w", fileName, err)
+		return fmt.Errorf("viper.ReadConfig(`%s/%s`): %w", path, fileName, err)
 	}
 
 	return nil
