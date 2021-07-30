@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -59,4 +60,36 @@ func ReadFile(filePath string) ([]byte, error) {
 	}
 
 	return data, nil
+}
+
+func readFiles(files []fs.FileInfo, dirPath string) (map[string][]byte, error) {
+	filesData := make(map[string][]byte, len(files))
+
+	for _, f := range files {
+		fileName := f.Name()
+
+		fullFilePath := dirPath + "/" + fileName
+		data, err := ReadFile(fullFilePath)
+		if err != nil {
+			return nil, fmt.Errorf("readFile %s: %w", fullFilePath, err)
+		}
+
+		filesData[fileName] = data
+	}
+
+	return filesData, nil
+}
+
+func ReadDir(dirName string) (map[string][]byte, error) {
+	files, err := ioutil.ReadDir(dirName)
+	if err != nil {
+		return nil, fmt.Errorf("read dir failed: %w", err)
+	}
+
+	filesData, err := readFiles(files, dirName)
+	if err != nil {
+		return nil, fmt.Errorf("read files failed: %w", err)
+	}
+
+	return filesData, nil
 }
